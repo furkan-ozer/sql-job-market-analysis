@@ -1,41 +1,40 @@
-# Global Data Job Market & Salary Analysis (PostgreSQL)
+# Global Data Job Market & Salary Benchmark Analysis (PostgreSQL)
 
-An analytical SQL project exploring global salary trends, competitive benchmarks, and employer tiering across European markets using PostgreSQL.
+An analytical SQL project evaluating global compensation structures, remote work premiums, and multi-market talent benchmarks across core data roles using PostgreSQL.
 
 ## Project Overview
-Analyzing labor market datasets often requires comparing individual records against segment benchmarks without losing row-level granularity. This project implements modular SQL architecture (CTEs) and advanced Window Functions to solve real-world talent acquisition and business intelligence questions without heavy JOIN overheads or row-collapsing GROUP BY clauses.
+Analyzing labor market compensation often suffers from skewed salary distributions, flawed hourly/annual inputs, and uncleaned job postings. This project implements modular Common Table Expressions (CTEs), robust non-parametric metrics, and multi-level Window Functions to deliver granular business intelligence without row-collapsing aggregate limitations or unnecessary table joins.
 
 ## Tech Stack & Analytical Techniques
-- **Database:** PostgreSQL
+- **Database:** PostgreSQL (v13+)
 - **Key Concepts:**
-  - **Common Table Expressions (CTEs):** Modularized, readable subquery workflows.
-  - **Ranking Windows:** `DENSE_RANK() OVER (...)` to isolate market leaders and handle salary ties.
-  - **Aggregate Windows:** `AVG()`, `MAX()`, `MIN()`, `COUNT()` combined with `OVER()` to compute segment baselines alongside individual observations.
-  - **Multi-Column Partitioning:** Isolating discrete market cohorts via `PARTITION BY job_country, job_title_short`.
-  - **Data Type Casting:** Precise financial rounding using `::NUMERIC`.
-
----
+  - **Robust Central Tendency:** `PERCENTILE_CONT(0.5)` (Median) alongside `AVG()` to handle right-skewed salary distributions.
+  - **Ranking Windows:** `DENSE_RANK() OVER (...)` to isolate compensation leaders while preserving salary ties.
+  - **Aggregate Windows:** `AVG()`, `MAX()`, `MIN()`, `COUNT()` with `OVER (PARTITION BY ...)` to calculate segment benchmarks alongside discrete records.
+  - **Weighted Baseline Modeling:** Combined aggregate window calculations `(SUM(SUM(...)) OVER () / SUM(COUNT(*)) OVER ())` to compute true market baselines across varying cohort sizes.
+  - **Data Hygiene:** Salary floors (`salary_year_avg > 15000`) and sample size thresholds (`HAVING COUNT(*) >= 10/100`) to eliminate outliers and unrepresentative samples.
 
 ## Key Analytical Scenarios Solved
 
-### 1. Market Baseline vs. Individual Postings
-Calculated the role average salary across Turkish tech postings and isolated exact deviations (`salary - avg`) in a single pass without extra subquery joins.
+### 1. Remote Work Premium & True Market Baseline
+Evaluated average and median compensation splits between remote and on-site positions. Applied a weighted global baseline to compute exact monetary deviations and premium percentages without Cartesian overhead.
 
-### 2. Top-N Employer Identification per Segment
-Leveraged `DENSE_RANK()` partitioned by role to identify the top 2 highest-paying employers across Germany, evaluating how far each leader outpaces the group median.
+### 2. High-Volume Geographic Compensation
+Identified top-paying countries meeting statistical sample thresholds (`COUNT >= 100`), comparing median and average compensation to account for extreme positive skewness.
 
-### 3. Macro Market Profiling (Benelux & CEE)
-Built aggregated profiles (total volume, floor, ceiling, and average rates) across Poland and the Netherlands to flag offers exceeding national thresholds.
+### 3. Specialization Demand & Market Share
+Quantified job posting volumes across data disciplines and derived market share percentages using total window aggregates in a single pass.
 
-### 4. Salary Tiering (Peak Rate Proximity)
-Calculated dynamic ceiling metrics to uncover companies offering salaries within 80% or more of peak market compensation per role.
+### 4. Compensation Spread Across Core Disciplines
+Evaluated minimum, median, average, and maximum compensation ranges across core data roles (Data Analyst, Data Engineer, Data Scientist) to identify wage dispersion.
 
-### 5. Multi-Dimensional Market Champions
-Partitioned data simultaneously across geography and specialization (`job_country` and `job_title_short`) to extract compensation leaders for cross-border talent acquisition.
+### 5. Dual Regional & Global Benchmarking
+Concurrently benchmarked individual tech postings in Turkey against both domestic market averages and global role-specific standards via modular CTE architectures.
 
----
+### 6. Role Champions & Tier Segmentation (Europe)
+Segmented top employers across Western European markets (Germany, Spain, France) using multi-column partitioning (`job_country`, `job_title_short`) and identified postings offering within 80% or more of the market peak rate.
 
 ## Repository Structure
 ```text
-├── README.md        # Project documentation & analytical methodology
-└── queries.sql      # Well-commented, runnable PostgreSQL queries
+├── README.md        # Project documentation, analytical methodology & business scenarios
+└── queries.sql      # Production-ready, modular PostgreSQL scripts
