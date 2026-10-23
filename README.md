@@ -1,53 +1,58 @@
-# Global Data Job Market & Salary Benchmark Analysis (PostgreSQL)
+# Global Tech Salary Benchmark & Executive Talent Dashboard
 
-An analytical SQL project evaluating global compensation structures, remote work salary premiums, and talent benchmarks across core data roles using PostgreSQL.
-
-## Project Overview
-Navigating tech compensation benchmarks often suffers from skewed salary distributions, uncleaned job postings, and flawed hourly/annual inputs. This project implements modular Common Table Expressions (CTEs), robust non-parametric metrics (medians), and multi-level Window Functions to deliver actionable market intelligence without row-collapsing aggregate limitations or unnecessary table joins.
-
-## Tech Stack & Analytical Techniques
-- **Database:** PostgreSQL (v13+)
-- **Key Concepts:**
-  - **Robust Central Tendency:** `PERCENTILE_CONT(0.5)` (Median) alongside `AVG()` to eliminate right-skewed salary bias.
-  - **Ranking Windows:** `DENSE_RANK() OVER (...)` to isolate market leaders while preserving ties.
-  - **Aggregate Windows:** `AVG()`, `MAX()`, `MIN()`, `COUNT()` with `OVER (PARTITION BY ...)` to evaluate cohort benchmarks alongside discrete records.
-  - **Weighted Baseline Modeling:** Combined aggregate window calculations `(SUM(SUM(...)) OVER () / SUM(COUNT(*)) OVER ())` to calculate true market baselines across varying sample weights.
-  - **Data Hygiene:** Hard salary floors (`salary_year_avg > 15000`) and sample size thresholds (`HAVING COUNT(*) >= 10/100`) to eliminate outliers and unrepresentative samples.
+An end-to-end data analytics project combining PostgreSQL data modeling with an Executive Power BI Dashboard to evaluate compensation benchmarks, geographic wage disparities, and remote work premiums across 22,000+ technical job postings.
 
 ---
 
-## Key Analytical Scenarios Solved (Queries 1–9)
+## Executive Dashboard Overview
 
-### 1. Remote Work Salary Premium & Distribution (Query 1)
-Evaluated average and median compensation splits between remote and non-remote roles. Implemented a weighted global baseline to compute monetary deviations and true premium percentages without Cartesian overhead.
+![Global Tech Salary Benchmark Dashboard](dashboard_overview.png)
 
-### 2. Highest Paying Countries Analysis (Query 2)
-Identified top-paying countries meeting statistical sample thresholds (`COUNT(*) >= 100`), comparing median and average compensation to account for extreme positive skewness.
+---
 
-### 3. Role Demand Distribution & Market Share (Query 3)
-Quantified job posting volumes across all data roles and computed exact market share percentages using total window aggregates (`SUM(COUNT(*)) OVER ()`) in a single pass.
+## Executive Summary & Key Metrics
 
-### 4. Highest Paying Companies Analysis (Query 4)
-Ranked leading compensation employers maintaining reliable hiring volume (`COUNT(*) >= 10`), using median salaries to identify true high-paying organizations.
+* **Total Verified Records:** 22,002 job postings across international markets.
+* **Global Median Salary:** \$115,000 baseline calculated via non-parametric medians (`PERCENTILE_CONT`).
+* **Remote Work Premium:** Remote positions command a +12.03% compensation premium (\$128,830 vs. \$115,000).
+* **Role Compensation Hierarchy:**
+  * Data Scientist: \$127,500
+  * Data Engineer: \$125,000
+  * Data Analyst: \$90,000
+* **Top Paying Geographies:** United States (\$119,188), Canada (\$115,000), and Germany (\$111,175) among jurisdictions meeting statistical reliability criteria ($N \ge 100$).
+* **Top Paying Employers:** Algo Capital Group (\$375,000), Snap Inc. (\$245,000), and Reddit (\$229,500) lead compensation among organizations with $N \ge 10$ postings.
 
-### 5. Core Data Roles Compensation Spread (Query 5)
-Compared salary dispersion across primary professions (*Data Analyst, Data Engineer, Data Scientist*) evaluating minimum, median, average, and maximum annual compensation.
+---
 
-### 6. Regional vs. Global Role Benchmark (Query 6)
-Concurrently benchmarked individual Data Analyst salaries in Turkey against both domestic market averages (`AVG() OVER ()`) and the global Data Analyst baseline via CTEs.
+## Technical Stack & Methodology
 
-### 7. Top Employers by Role - Germany (Query 7)
-Isolated the top 2 paying employers per discipline (*Data Analyst, Data Engineer*) in Germany using `DENSE_RANK()`, measuring individual variances from the role average.
+* **Database Engine:** PostgreSQL (Common Table Expressions, Window Functions, `PERCENTILE_CONT`, Aggregate Filtering).
+* **Business Intelligence:** Microsoft Power BI Desktop.
+* **Data Modeling & DAX:** Custom measures for non-parametric central tendency, cohort ratio distributions, and compensation variance.
+* **Dashboard Architecture:** Dark executive theme optimized for readability, adhering to Edward Tufte's data-ink ratio by removing non-essential gridlines and integrating explicit data labels.
 
-### 8. Upper Tier Salary Distribution - Spain (Query 8)
-Identified Spanish postings offering within 80% or more of the market ceiling (`MAX() OVER ()`) across core roles to uncover top-tier compensation packages.
+---
 
-### 9. Cross-Country Role Champions - Germany & France (Query 9)
-Extracted the highest-paying market champions for Data Analysts and Data Scientists across Germany and France using multi-column partitioning (`job_country, job_title_short`).
+## Analytical Architecture: SQL to Power BI Mapping
+
+| Analysis Dimension | SQL Implementation | Power BI & DAX Alignment |
+| :--- | :--- | :--- |
+| **Global Compensation Baseline** | `PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY salary_year_avg)` | Reconciled against `Median Salary` measure (\$115,000) |
+| **Remote Premium Quantification** | Segmented CTE evaluating `job_work_from_home` boolean flags | Calculated via `work_mode` dimension (\$128,830 vs. \$115,000) |
+| **Role Volume Distribution** | `COUNT(*)` aggregations with relative window percentages | Interactive Donut visual monitoring 22,002 postings |
+| **Geographic Filtering** | Sample threshold filtering via `HAVING COUNT(*) >= 100` | Filtered horizontal ranking displaying Top 10 countries |
+| **Enterprise Compensation** | Sample threshold filtering via `COUNT(*) >= 10` with deterministic sorting | Ranked bar chart identifying top-paying organizations |
 
 ---
 
 ## Repository Structure
+
 ```text
-├── README.md        # Project documentation, analytical methodology & business scenarios
-└── queries.sql      # Production-ready, modular PostgreSQL scripts
+├── sql/
+│   ├── 01_remote_salary_analysis.sql
+│   ├── 02_top_paying_countries.sql
+│   ├── 03_market_share_by_role.sql
+│   └── 04_top_paying_companies.sql
+├── dashboard_overview.png
+├── tech_salary_dashboard.pbix
+└── README.md
