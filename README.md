@@ -56,3 +56,9 @@ An end-to-end data analytics project combining PostgreSQL data modeling with an 
 ├── dashboard_overview.png
 ├── tech_salary_dashboard.pbix
 └── README.md
+'''
+---
+
+## Author
+* **Furkan Özer** - Graduate Researcher / Data Analyst
+* Portfolio Project: End-to-End SQL & Power BI Implementation
